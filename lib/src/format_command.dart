@@ -95,7 +95,7 @@ class FormatCommand extends Command<Null> {
 
   Future<Null> _formatDart() async {
     print('Formatting all .dart files...');
-    await Process.run('flutter', <String>['format'],
+    await Process.run('flutter', <String>['format', packagesDir.path],
         workingDirectory: packagesDir.path);
   }
 
