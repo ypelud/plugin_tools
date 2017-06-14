@@ -5,15 +5,12 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as p;
 
 import 'common.dart';
 
-class TestCommand extends Command<Null> {
-  TestCommand(this.packagesDir);
-
-  final Directory packagesDir;
+class TestCommand extends PluginCommand {
+  TestCommand(Directory packagesDir) : super(packagesDir);
 
   @override
   final String name = 'test';
@@ -24,7 +21,7 @@ class TestCommand extends Command<Null> {
   @override
   Future<Null> run() async {
     final List<String> failingPackages = <String>[];
-    await for (Directory packageDir in _listAllPackages(packagesDir)) {
+    await for (Directory packageDir in _listAllPackages()) {
       final String packageName =
           p.relative(packageDir.path, from: packagesDir.path);
       if (!new Directory(p.join(packageDir.path, 'test')).existsSync()) {
@@ -52,8 +49,7 @@ class TestCommand extends Command<Null> {
     print('All tests are passing!');
   }
 
-  Stream<Directory> _listAllPackages(Directory root) => root
-      .list(recursive: true)
+  Stream<Directory> _listAllPackages() => getPluginFiles(recursive: true)
       .where((FileSystemEntity entity) =>
           entity is File && p.basename(entity.path) == 'pubspec.yaml')
       .map((FileSystemEntity entity) => entity.parent);

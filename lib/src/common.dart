@@ -5,11 +5,52 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:args/command_runner.dart';
+import 'package:path/path.dart' as p;
+import 'package:async/async.dart';
+
 /// Error thrown when a command needs to exit with a non-zero exit code.
 class ToolExit extends Error {
   ToolExit(this.exitCode);
 
   final int exitCode;
+}
+
+abstract class PluginCommand extends Command<Null> {
+  static const String _pluginsArg = 'plugins';
+  final Directory packagesDir;
+
+  PluginCommand(this.packagesDir) {
+    argParser.addOption(
+      _pluginsArg,
+      allowMultiple: true,
+      splitCommas: true,
+      help: 'Specifies which plugins the command should run on.',
+      valueHelp: 'plugin1,plugin2,...',
+    );
+  }
+
+  Stream<FileSystemEntity> getPluginFiles({bool recursive: false}) {
+    final List<String> packages = argResults[_pluginsArg];
+    if (packages.isEmpty) {
+      return packagesDir.list(recursive: recursive);
+    } else {
+      final List<Directory> filteredPackages = packagesDir.listSync().where(
+          (FileSystemEntity entity) =>
+              entity is Directory &&
+              packages.contains(p.basename(entity.path)));
+      if (recursive) {
+        final List<Stream<FileSystemEntity>> streams =
+            <Stream<FileSystemEntity>>[];
+        for (Directory directory in filteredPackages) {
+          streams.add(directory.list(recursive: true));
+        }
+        return StreamGroup.merge(streams);
+      } else {
+        return new Stream<FileSystemEntity>.fromIterable(filteredPackages);
+      }
+    }
+  }
 }
 
 Future<int> runAndStream(
