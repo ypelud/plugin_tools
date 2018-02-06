@@ -8,7 +8,6 @@ import 'dart:io';
 
 import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as p;
-import 'package:async/async.dart';
 
 /// Error thrown when a command needs to exit with a non-zero exit code.
 class ToolExit extends Error {
@@ -33,11 +32,11 @@ abstract class PluginCommand extends Command<Null> {
 
   Stream<FileSystemEntity> getPluginFiles() async* {
     final List<String> packages = argResults[_pluginsArg];
-    final ProcessResult result = await runAndExitOnError('git', ['ls-files'], workingDir: packagesDir);
+    final ProcessResult result = await runAndExitOnError('git', <String>['ls-files'], workingDir: packagesDir);
     Iterable<String> files = const LineSplitter().convert(result.stdout);
     if (packages.isNotEmpty)
       files = files.where((String s) => packages.contains(s.split(p.separator).first));
-    yield* new Stream.fromIterable(files.map((String s) => new File(p.join(packagesDir.path, s))));
+    yield* new Stream<FileSystemEntity>.fromIterable(files.map((String s) => new File(p.join(packagesDir.path, s))));
   }
 }
 
