@@ -32,11 +32,16 @@ abstract class PluginCommand extends Command<Null> {
 
   Stream<FileSystemEntity> getPluginFiles() async* {
     final List<String> packages = argResults[_pluginsArg];
-    final ProcessResult result = await runAndExitOnError('git', <String>['ls-files'], workingDir: packagesDir);
+    final ProcessResult result = await runAndExitOnError(
+        'git', <String>['ls-files'],
+        workingDir: packagesDir);
     Iterable<String> files = const LineSplitter().convert(result.stdout);
-    if (packages.isNotEmpty)
-      files = files.where((String s) => packages.contains(s.split(p.separator).first));
-    yield* new Stream<FileSystemEntity>.fromIterable(files.map((String s) => new File(p.join(packagesDir.path, s))));
+    if (packages.isNotEmpty) {
+      files = files
+          .where((String s) => packages.contains(s.split(p.separator).first));
+    }
+    yield* new Stream<FileSystemEntity>.fromIterable(
+        files.map((String s) => new File(p.join(packagesDir.path, s))));
   }
 }
 

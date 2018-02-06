@@ -78,7 +78,6 @@ class FormatCommand extends PluginCommand {
   Future<Null> _formatObjectiveC() async {
     print('Formatting all .m and .h files...');
     final Iterable<String> hFiles = await _getFilesWithExtension('.h');
-    print(hFiles);
     final Iterable<String> mFiles = await _getFilesWithExtension('.m');
     await runAndStream(argResults['clang-format'],
         <String>['-i', '--style=Google']..addAll(hFiles)..addAll(mFiles),
