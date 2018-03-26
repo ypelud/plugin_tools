@@ -18,6 +18,7 @@ class ToolExit extends Error {
 
 abstract class PluginCommand extends Command<Null> {
   static const String _pluginsArg = 'plugins';
+  static const String _upgradeArg = 'upgrade';
   final Directory packagesDir;
 
   PluginCommand(this.packagesDir) {
@@ -27,6 +28,12 @@ abstract class PluginCommand extends Command<Null> {
       splitCommas: true,
       help: 'Specifies which plugins the command should run on.',
       valueHelp: 'plugin1,plugin2,...',
+    );
+
+    argParser.addFlag(
+      _upgradeArg,
+      help: 'Force package upgrade instead of get.',
+      negatable: false
     );
   }
 
@@ -51,6 +58,9 @@ abstract class PluginCommand extends Command<Null> {
       }
     }
   }
+
+  String get packagesAction => argResults[_upgradeArg] ? 'upgrade' : 'get';
+
 }
 
 Future<int> runAndStream(String executable, List<String> args,

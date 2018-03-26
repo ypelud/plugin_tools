@@ -26,7 +26,7 @@ class AnalyzeCommand extends PluginCommand {
         workingDir: packagesDir, exitOnError: true);
 
     await for (Directory package in _listAllPackages()) {
-      await runAndStream('flutter', <String>['packages', 'get'],
+      await runAndStream('flutter', <String>['packages', packagesAction],
           workingDir: package, exitOnError: true);
     }
 
